@@ -9,44 +9,61 @@ import {
   Container,
   Typography,
   InputAdornment,
-  Alert,
 } from '@mui/material';
 import { TagSelect } from './TagSelect';
 import { ActionType } from '../store/Store';
 import { SavedTab } from '../types/SavedTab';
 import { TabPreview } from '../types/TabPreview';
+import { aiService } from '../services/AiService';
+import { AlertsContainer } from './AlertsContainer';
 
 export const UploadForm: React.FC = () => {
   const { state, computed, dispatch } = useStoreContext();
 
   const { currentTab } = state;
 
-  useEffect(() => {
-    const initialize = async () => {
-      try {
-        const tabPreview: TabPreview =
-          await tabPreviewService.getCurrentTabPreview();
+  const getCurrentTab = async () => {
+    try {
+      const tabPreview: TabPreview =
+        await tabPreviewService.getCurrentTabPreview();
 
-        const savedTab: SavedTab | null =
-          await bookmarkService.getSavedTabByUrl(tabPreview.url);
+      const savedTab: SavedTab | null = await bookmarkService.getSavedTabByUrl(
+        tabPreview.url,
+      );
 
+      dispatch({
+        type: ActionType.SetCurrentTab,
+        payload: { tabPreview, savedTab },
+      });
+
+      if (savedTab) {
         dispatch({
-          type: ActionType.SetCurrentTab,
-          payload: { tabPreview, savedTab },
+          type: ActionType.SelectFolders,
+          payload: savedTab.folders.map((folder) => folder.id),
         });
-
-        if (savedTab) {
-          dispatch({
-            type: ActionType.SelectFolders,
-            payload: savedTab.folders.map((folder) => folder.id),
-          });
-        }
-      } catch (error) {
-        console.error(error);
       }
-    };
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-    initialize();
+  const getAiCapabilities = async () => {
+    const capabilities = await aiService.getAiCapabilities();
+
+    if (
+      capabilities !== 'unsupported' &&
+      capabilities.available === 'after-download'
+    ) {
+      aiService.initSession();
+    }
+
+    dispatch({ type: ActionType.SetAiCapabilities, payload: capabilities });
+  };
+
+  useEffect(() => {
+    getCurrentTab();
+
+    getAiCapabilities();
   }, []);
 
   const handleSubmit = async () => {
@@ -67,20 +84,11 @@ export const UploadForm: React.FC = () => {
 
   return (
     <Container sx={{ py: 3 }}>
-      {isTabSaved && (
-        <Alert severity="info" sx={{ mb: 2 }}>
-          This page is already bookmarked. You can update its title or folders.
-        </Alert>
-      )}
+      <AlertsContainer />
 
       <Typography variant="subtitle1" gutterBottom>
         {actionText}
       </Typography>
-
-      <Alert severity="warning">
-        Due to some tech stuff AI feature will be disabled
-      </Alert>
-
       {currentTab && (
         <TextField
           label="Bookmark Title"
@@ -108,9 +116,7 @@ export const UploadForm: React.FC = () => {
           }}
         />
       )}
-
       <TagSelect />
-
       <Button
         variant="contained"
         color="primary"

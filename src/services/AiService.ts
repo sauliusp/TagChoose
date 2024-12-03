@@ -1,34 +1,46 @@
-import { PromptConfig } from '../types/PromptConfig';
-
 const SYSTEM_PROMPT = `You are a highly intelligent and efficient assistant designed to categorize and organize bookmarks into appropriate folders.`;
 
 class AiService {
   private static instance: AiService;
 
-  private session: typeof chrome.aiOriginTrial.session = null;
+  private session: AILanguageModel | null = null;
 
   private constructor() {}
 
-  public static getInstance(): AiService {
+  static getInstance(): AiService {
     if (!AiService.instance) {
       AiService.instance = new AiService();
     }
     return AiService.instance;
   }
 
-  public async runPrompt(
-    prompt: string,
-    params: Partial<PromptConfig>,
-  ): Promise<string> {
+  async getAiCapabilities(): Promise<
+    AILanguageModelCapabilities | 'unsupported'
+  > {
+    if (!('aiOriginTrial' in chrome)) {
+      return 'unsupported';
+    }
+
+    return await self.ai.languageModel.capabilities();
+  }
+
+  async initSession(): Promise<void> {
     try {
-      if (!this.session) {
-        this.session = await chrome.aiOriginTrial.languageModel.create({
-          systemPrompt: SYSTEM_PROMPT,
-          ...params,
-        });
+      this.session = await self.ai.languageModel.create({
+        systemPrompt: SYSTEM_PROMPT,
+      });
+    } catch {
+      throw new Error('Failed to initialize the AI session.');
+    }
+  }
+
+  async runPrompt(prompt: string): Promise<string> {
+    try {
+      if (this.session === null) {
+        await this.initSession();
       }
 
-      return this.session.prompt(prompt);
+      return this.session!.prompt(prompt);
     } catch (e) {
       console.error('Prompt failed', e);
 
@@ -37,38 +49,12 @@ class AiService {
     }
   }
 
-  public async reset(): Promise<void> {
+  async reset(): Promise<void> {
     if (this.session) {
       this.session.destroy();
     }
 
     this.session = null;
-  }
-
-  public async initDefaults(): Promise<{
-    defaultTemperature: number;
-    defaultTopK: number;
-    maxTopK: number;
-  }> {
-    if (!('aiOriginTrial' in chrome)) {
-      throw new Error(
-        'Error: chrome.aiOriginTrial not supported in this browser',
-      );
-    }
-
-    const defaults = await chrome.aiOriginTrial.languageModel.capabilities();
-
-    if (defaults.available !== 'readily') {
-      throw new Error(
-        `Model not yet available (current state: "${defaults.available}")`,
-      );
-    }
-
-    return {
-      defaultTemperature: defaults.defaultTemperature,
-      defaultTopK: Math.min(defaults.defaultTopK, 3),
-      maxTopK: defaults.maxTopK,
-    };
   }
 }
 

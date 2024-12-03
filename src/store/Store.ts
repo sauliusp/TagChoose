@@ -1,3 +1,4 @@
+import { AiCapabilities } from '../types/AiCapabilities';
 import { CurrentTab } from '../types/CurrentTab';
 import { Folder } from '../types/Folder';
 import { SavedTab } from '../types/SavedTab';
@@ -5,6 +6,7 @@ import { TabPreview } from '../types/TabPreview';
 
 export enum ActionType {
   SelectFolders = 'SelectFolders',
+  SetAiCapabilities = 'SetAiCapabilities',
   SetAiSuggestion = 'SetAiSuggestion',
   SetCurrentTab = 'SetCurrentTab',
   SetFolders = 'SetFolders',
@@ -14,6 +16,7 @@ export enum ActionType {
 
 export type Action =
   | { type: ActionType.SelectFolders; payload: Folder['id'][] }
+  | { type: ActionType.SetAiCapabilities; payload: AiCapabilities }
   | { type: ActionType.SetAiSuggestion; payload: string }
   | {
       type: ActionType.SetCurrentTab;
@@ -28,6 +31,7 @@ export enum UiState {
 }
 
 export interface State {
+  aiCapabilities: AiCapabilities | null;
   aiResponse: string | null;
   allFolderIds: Folder['id'][];
   currentTab: CurrentTab;
@@ -38,13 +42,8 @@ export interface State {
   uiState: UiState;
 }
 
-export interface ComputedProps {
-  prompt: string;
-  savedTab: SavedTab | null;
-  folderTitleString: string;
-}
-
 export const INITIAL_STATE: State = {
+  aiCapabilities: null,
   aiResponse: null,
   allFolderIds: [],
   currentTab: {
@@ -123,6 +122,11 @@ export function reducer(state: State, action: Action): State {
       return {
         ...state,
         selectedFolderIds: action.payload,
+      };
+    case ActionType.SetAiCapabilities:
+      return {
+        ...state,
+        aiCapabilities: action.payload,
       };
     case ActionType.SetAiSuggestion: {
       const aiResponse = action.payload;

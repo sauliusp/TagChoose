@@ -12,7 +12,6 @@ import { useStoreContext } from '../store/StoreContext';
 import { bookmarkService } from '../services/bookmarkService';
 import { aiService } from '../services/AiService';
 import { ActionType } from '../store/Store';
-import { AiModelDefaults } from '../types/AiModelDefaults';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { Folder } from '../types/Folder';
 
@@ -23,7 +22,7 @@ export const TagSelect: React.FC = () => {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const [aiDefaults, setAiDefaults] = useState<AiModelDefaults | null>(null);
+  const aiButtonEnabled = computed.aiReady && !isLoading;
 
   useEffect(() => {
     const downloadFolders = async () => {
@@ -36,32 +35,23 @@ export const TagSelect: React.FC = () => {
       }
     };
 
-    const initAi = async () => {
-      try {
-        const defaults = await aiService.initDefaults();
-
-        setAiDefaults(defaults);
-      } catch (err) {
-        setError(err.message);
-      }
-    };
-
     downloadFolders();
-
-    initAi();
   }, []);
 
   const handlePrompt = async (prompt: string) => {
+    if (!state.aiCapabilities || state.aiCapabilities === 'unsupported') {
+      throw new Error('AI capabilities are not supported.');
+    }
+
     setError('');
     setIsLoading(true);
 
     try {
-      if (!aiDefaults) throw new Error('Defaults not loaded');
-
       const params = {
-        temperature: aiDefaults.defaultTemperature,
-        topK: aiDefaults.defaultTopK,
+        temperature: state.aiCapabilities.defaultTemperature as number,
+        topK: state.aiCapabilities.defaultTopK as number,
       };
+
       const result = await aiService.runPrompt(prompt, params);
 
       dispatch({ type: ActionType.SetAiSuggestion, payload: result });
@@ -137,7 +127,7 @@ export const TagSelect: React.FC = () => {
               color="primary"
               aria-label="suggest folders"
               size="small"
-              disabled={isLoading}
+              disabled={!aiButtonEnabled}
               sx={{ flexShrink: 0, ml: '12px', mt: '9px' }}
               onClick={() => handlePrompt(computed.prompt)}
             >
