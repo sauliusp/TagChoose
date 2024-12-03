@@ -9,6 +9,7 @@ import {
   Container,
   Typography,
   InputAdornment,
+  ButtonOwnProps,
 } from '@mui/material';
 import { TagSelect } from './TagSelect';
 import { ActionType } from '../store/Store';
@@ -16,11 +17,18 @@ import { SavedTab } from '../types/SavedTab';
 import { TabPreview } from '../types/TabPreview';
 import { aiService } from '../services/AiService';
 import { AlertsContainer } from './AlertsContainer';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+
+const POPUP_CLOSE_DELAY = 350;
 
 export const UploadForm: React.FC = () => {
-  const { state, computed, dispatch } = useStoreContext();
+  const {
+    state: { currentTab, selectedFolderIds },
+    computed,
+    dispatch,
+  } = useStoreContext();
 
-  const { currentTab } = state;
+  const [submitComplete, setSubmitComplete] = React.useState(false);
 
   const getCurrentTab = async () => {
     try {
@@ -67,27 +75,58 @@ export const UploadForm: React.FC = () => {
   }, []);
 
   const handleSubmit = async () => {
+    if (submitComplete) {
+      return;
+    }
+
     try {
       await bookmarkService.upsertBookmarkInMultipleFolders(
-        state.selectedFolderIds,
+        selectedFolderIds,
         currentTab.title,
         currentTab.preview.url,
       );
+
+      setSubmitComplete(true);
+
+      closePopup();
     } catch (error) {
       console.error(error);
     }
   };
 
+  const closePopup = () => {
+    setTimeout(() => {
+      window.close();
+    }, POPUP_CLOSE_DELAY);
+  };
+
   const isTabSaved = computed.savedTab !== null;
 
-  const actionText = `${isTabSaved ? 'Update' : 'Save'} Bookmark`;
+  const ctaText = `${isTabSaved ? 'Update' : 'Save'} Bookmark`;
+
+  const ctaButtonConfig: {
+    color: ButtonOwnProps['color'];
+    content: React.ReactNode;
+  } = submitComplete
+    ? {
+        color: 'success',
+        content: (
+          <>
+            <CheckCircleIcon sx={{ mr: 1 }} /> {ctaText}
+          </>
+        ),
+      }
+    : {
+        color: 'primary',
+        content: ctaText,
+      };
 
   return (
     <Container sx={{ py: 3 }} role="form">
       <AlertsContainer />
 
       <Typography variant="subtitle1" gutterBottom>
-        {actionText}
+        {ctaText}
       </Typography>
 
       {currentTab && (
@@ -120,15 +159,15 @@ export const UploadForm: React.FC = () => {
 
       <Button
         variant="contained"
-        color="primary"
+        color={ctaButtonConfig.color}
         size="large"
         onClick={handleSubmit}
         fullWidth
         sx={{ mt: 3 }}
         role="submit"
-        aria-label={actionText}
+        aria-label="Submit"
       >
-        {actionText}
+        {ctaButtonConfig.content}
       </Button>
     </Container>
   );
