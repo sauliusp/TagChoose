@@ -83,12 +83,13 @@ export const UploadForm: React.FC = () => {
   const actionText = `${isTabSaved ? 'Update' : 'Save'} Bookmark`;
 
   return (
-    <Container sx={{ py: 3 }}>
+    <Container sx={{ py: 3 }} role="form">
       <AlertsContainer />
 
       <Typography variant="subtitle1" gutterBottom>
         {actionText}
       </Typography>
+
       {currentTab && (
         <TextField
           label="Bookmark Title"
@@ -101,22 +102,22 @@ export const UploadForm: React.FC = () => {
           }
           fullWidth
           margin="normal"
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <img
-                    src={currentTab.preview.faviconUrl}
-                    alt="icon"
-                    style={{ width: 24, height: 24 }}
-                  />
-                </InputAdornment>
-              ),
-            },
+          aria-label="Bookmark Title"
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <img
+                  src={currentTab.preview.faviconUrl}
+                  alt={`${currentTab.title} favicon`}
+                  style={{ width: 24, height: 24 }}
+                />
+              </InputAdornment>
+            ),
           }}
         />
       )}
-      <TagSelect />
+      <TagSelect aria-label="Tag Selection" />
+
       <Button
         variant="contained"
         color="primary"
@@ -124,6 +125,8 @@ export const UploadForm: React.FC = () => {
         onClick={handleSubmit}
         fullWidth
         sx={{ mt: 3 }}
+        role="submit"
+        aria-label={actionText}
       >
         {actionText}
       </Button>

@@ -1,6 +1,5 @@
 import React from 'react';
 import { useStoreContext } from '../store/StoreContext';
-
 import { Alert, Link } from '@mui/material';
 
 export const AlertsContainer: React.FC = () => {
@@ -19,14 +18,24 @@ export const AlertsContainer: React.FC = () => {
   return (
     <>
       {showSavedTabAlert && (
-        <Alert severity="success" sx={{ mb: 2 }}>
+        <Alert
+          severity="success"
+          sx={{ mb: 2 }}
+          role="alert"
+          aria-live="polite"
+        >
           This page is already bookmarked, but you can update its title or
           modify the associated folders.
         </Alert>
       )}
 
       {showAiWarning && (
-        <Alert severity="warning" sx={{ mb: 2 }}>
+        <Alert
+          severity="warning"
+          sx={{ mb: 2 }}
+          role="alert"
+          aria-live="assertive"
+        >
           AI features are supported in your browser but are currently
           unavailable. You can still tag this bookmark using autocomplete. Visit
           the product&apos;s{' '}
@@ -34,6 +43,7 @@ export const AlertsContainer: React.FC = () => {
             href="https://github.com/sauliusp/TagChoose/blob/main/README.md#installation"
             target="_blank"
             underline="none"
+            aria-label="Technical Details"
           >
             Technical Details
           </Link>{' '}
@@ -42,7 +52,12 @@ export const AlertsContainer: React.FC = () => {
       )}
 
       {showDownloadWarning && (
-        <Alert severity="warning" sx={{ mb: 2 }}>
+        <Alert
+          severity="warning"
+          sx={{ mb: 2 }}
+          role="alert"
+          aria-live="assertive"
+        >
           The AI model is being downloaded... This may take some time, but you
           can still tag this bookmark manually using autocomplete in the
           meantime.
@@ -50,7 +65,12 @@ export const AlertsContainer: React.FC = () => {
       )}
 
       {showAiError && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert
+          severity="error"
+          sx={{ mb: 2 }}
+          role="alert"
+          aria-live="assertive"
+        >
           AI features are not supported in your browser. However, you can still
           tag this bookmark manually using autocomplete.
         </Alert>

@@ -96,6 +96,7 @@ export const TagSelect: React.FC = () => {
                 key={id}
                 onDelete={() => handleTagDelete(id)}
                 {...tagProps}
+                aria-label={`Tag: ${state.foldersById[id].title}`}
               />
             );
           })
@@ -114,14 +115,15 @@ export const TagSelect: React.FC = () => {
                 helperText={error}
                 label="Bookmark Folders"
                 placeholder="Bookmark Folders"
+                aria-label="Bookmark Folders"
               />
 
-              {isLoading && <LinearProgress />}
+              {isLoading && <LinearProgress aria-label="Loading" />}
             </Box>
 
             <Fab
               color="primary"
-              aria-label="suggest folders"
+              aria-label="Suggest folders"
               size="small"
               disabled={!aiButtonEnabled}
               sx={{ flexShrink: 0, ml: '12px', mt: '9px' }}
