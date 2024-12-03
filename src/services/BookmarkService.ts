@@ -33,26 +33,6 @@ class BookmarkService {
     return flattenFolders(bookmarkTree);
   }
 
-  async createBookmark(
-    folderId: string,
-    title: string,
-    url: string,
-  ): Promise<Bookmark> {
-    if (!folderId || !title || !url) {
-      throw new Error(
-        'Folder ID, title, and URL are required to create a bookmark.',
-      );
-    }
-
-    const bookmark = await chrome.bookmarks.create({
-      parentId: folderId,
-      title,
-      url,
-    });
-
-    return bookmark;
-  }
-
   async upsertBookmarkInMultipleFolders(
     folderIds: string[],
     title: string,
