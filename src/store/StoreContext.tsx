@@ -9,6 +9,7 @@ import React, {
 import { reducer, INITIAL_STATE, Action, State, ComputedProps } from './Store';
 import { CurrentTab } from '../types/CurrentTab';
 import { SavedTab } from '../types/SavedTab';
+import { PromptPayload } from '../types/PromptPayload';
 
 export interface StoreContextProps {
   state: State;
@@ -18,9 +19,9 @@ export interface StoreContextProps {
 
 interface ComputedProps {
   aiReady: boolean;
-  prompt: string;
+  folderListString: string;
+  promptPayload: PromptPayload;
   savedTab: SavedTab | null;
-  folderTitleString: string;
 }
 
 const StoreContext = createContext<StoreContextProps>({} as StoreContextProps);
@@ -36,24 +37,18 @@ const StoreProvider = ({ children }: { children: ReactNode }) => {
         state.aiCapabilities.available === 'readily'
       );
     },
-    get folderTitleString(): string {
+    get folderListString(): string {
       return Object.keys(state.foldersByTitle).join(', ');
     },
     get savedTab(): CurrentTab['savedTab'] {
       return state.currentTab.savedTab;
     },
-    get prompt(): string {
-      return `
-<url>${state.currentTab.preview.url}</url>
-<title>${state.currentTab.preview.title}</title>
-<folders>${this.folderTitleString}</folders>
-<instruction>
-  Select the most appropriate folder for the bookmark from the list. 
-  Preferably choose one folder, but if the content strongly fits multiple, return up to three folders. 
-  Output a comma-separated list of folder titles (e.g., "Folder1" or "Folder1, Folder2"). 
-  Minimize the number of folders whenever possible. If no folder is suitable, return an empty string.
-</instruction>
-    `.trim();
+    get promptPayload(): PromptPayload {
+      return {
+        url: state.currentTab.preview.url,
+        title: state.currentTab.preview.title,
+        folderListString: this.folderListString,
+      };
     },
   };
 

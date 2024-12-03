@@ -1,3 +1,5 @@
+import { PromptPayload } from '../types/PromptPayload';
+
 const SYSTEM_PROMPT = `You are a highly intelligent and efficient assistant designed to categorize and organize bookmarks into appropriate folders.`;
 
 class AiService {
@@ -34,13 +36,28 @@ class AiService {
     }
   }
 
-  async runPrompt(prompt: string): Promise<string> {
+  getPrompt(payload: PromptPayload): string {
+    const { url, title, folderListString } = payload;
+
+    return `
+<reference>
+  Website URL: ${url}, title: ${title}, available folders: ${folderListString}
+</reference>
+<instruction>
+  Select the most appropriate folder for the bookmark from the list. 
+  Preferably choose one folder, but if the content strongly fits multiple, return up to three folders. 
+  Output a comma-separated list of folder titles (e.g., "Folder1" or "Folder1, Folder2"). 
+</instruction>
+    `.trim();
+  }
+
+  async runPrompt(payload: PromptPayload): Promise<string> {
     try {
       if (this.session === null) {
         await this.initSession();
       }
 
-      return this.session!.prompt(prompt);
+      return this.session!.prompt(this.getPrompt(payload));
     } catch (e) {
       console.error('Prompt failed', e);
 

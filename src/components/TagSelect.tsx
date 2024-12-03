@@ -14,6 +14,7 @@ import { aiService } from '../services/AiService';
 import { ActionType } from '../store/Store';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { Folder } from '../types/Folder';
+import { PromptPayload } from '../types/PromptPayload';
 
 export const TagSelect: React.FC = () => {
   const { state, computed, dispatch } = useStoreContext();
@@ -38,7 +39,7 @@ export const TagSelect: React.FC = () => {
     downloadFolders();
   }, []);
 
-  const handlePrompt = async (prompt: string) => {
+  const handlePrompt = async (promptPayload: PromptPayload) => {
     if (!state.aiCapabilities || state.aiCapabilities === 'unsupported') {
       throw new Error('AI capabilities are not supported.');
     }
@@ -47,12 +48,7 @@ export const TagSelect: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const params = {
-        temperature: state.aiCapabilities.defaultTemperature as number,
-        topK: state.aiCapabilities.defaultTopK as number,
-      };
-
-      const result = await aiService.runPrompt(prompt, params);
+      const result = await aiService.runPrompt(promptPayload);
 
       dispatch({ type: ActionType.SetAiSuggestion, payload: result });
     } catch (err) {
@@ -129,7 +125,7 @@ export const TagSelect: React.FC = () => {
               size="small"
               disabled={!aiButtonEnabled}
               sx={{ flexShrink: 0, ml: '12px', mt: '9px' }}
-              onClick={() => handlePrompt(computed.prompt)}
+              onClick={() => handlePrompt(computed.promptPayload)}
             >
               <AutoAwesomeIcon />
             </Fab>

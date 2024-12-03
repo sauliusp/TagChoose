@@ -19,9 +19,9 @@ export const AlertsContainer: React.FC = () => {
   return (
     <>
       {showSavedTabAlert && (
-        <Alert severity="info" sx={{ mb: 2 }}>
-          This page is already bookmarked. You can update its title or modify
-          the associated folders.
+        <Alert severity="success" sx={{ mb: 2 }}>
+          This page is already bookmarked, but you can update its title or
+          modify the associated folders.
         </Alert>
       )}
 
