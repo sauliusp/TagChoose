@@ -23,12 +23,12 @@ class AiService {
       return 'unsupported';
     }
 
-    return await self.ai.languageModel.capabilities();
+    return await chrome.aiOriginTrial.languageModel.capabilities();
   }
 
   async initSession(): Promise<void> {
     try {
-      this.session = await self.ai.languageModel.create({
+      this.session = await chrome.aiOriginTrial.languageModel.create({
         systemPrompt: SYSTEM_PROMPT,
       });
     } catch {

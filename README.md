@@ -48,9 +48,9 @@ For detailed information, see the [Product Specification](PRODUCT_SPEC.md).
 4. **Load the Extension in Chrome**:
    - Download the latest [Chrome Canary](https://www.google.com/chrome/canary/) in order to be able to experiment with the latest AI features.
    - Make sure you have these Chrome flags adjusted accordingly:
-     - [chrome://flags/#optimization-guide-on-device-model](chrome://flags/#optimization-guide-on-device-model) should be set to `Enabled BypassPerfRequirement`
-     - [chrome://flags/#prompt-api-for-gemini-nano](chrome://flags/#prompt-api-for-gemini-nano) should be `Enabled`
-     - [chrome://flags/#text-safety-classifier](chrome://flags/#prompt-api-for-gemini-nano) should be `Disabled`
+     - `chrome://flags/#optimization-guide-on-device-model` should be set to `Enabled BypassPerfRequirement`
+     - `chrome://flags/#prompt-api-for-gemini-nano` should be `Enabled`
+     - `chrome://flags/#text-safety-classifier` should be `Disabled`
    - Relaunch Chrome.
    - Navigate to `chrome://extensions/` in Chrome.
    - Enable **Developer mode** in the top-right corner.
